@@ -1,0 +1,71 @@
+float a = 0.1;    //amplitude of sin wave
+float max = 130;  //max multiplier per iteration
+float min = 100;
+float alpha = random(5,15);  //frequency parameter
+float beta = random(5,15);
+
+//function for star like point
+void star(float x, float y)
+{
+  stroke(235, 212, 203);
+  strokeWeight(2);
+  point(x,y);
+  
+  noFill();
+  
+  for (int i = 1; i <= 10; i++)
+  {
+    float t = 255 - 25.5 * i;
+    stroke(235, 212, 203,t);
+    circle(x,y,i);
+  }
+  strokeWeight(1);
+}
+
+void setup() {
+  size(1600, 900);
+  background(182, 70, 95);
+  stroke(218, 159, 147);
+
+}
+
+void draw() {
+  float m = random(min,max);    //multiplayer
+  float px = 0, py = height/2;  //left center
+
+  //line is more transparent a amplitude is lower
+  float transparency = 255 - 20 * (exp((-1*a+10)/500));
+  stroke(218, 159, 147,transparency);
+  
+  //draw the lines, then make stars at random
+  for (float x = 1; x < width; x++)
+  {
+    float y = a * x * sin(x*alpha/width) + height/2;
+    line(px,py,x,y);
+    px = x;
+    py = y;
+  }
+  for (float x = 1; x < width; x++)
+  {
+    float y = -1 * a * x * sin(x*beta/width) + height/2;
+    line(px,py,x,y);
+    px = x;
+    py = y;
+  }
+  for (float x = 1; x < width; x++)
+  {
+    float y = a * x * sin(x*alpha/width) + height/2;
+    float p = random(1000);
+    if (p < 1) star(x,y);    
+  }
+  for (float x = 1; x < width; x++)
+  {
+    float y = -1 * a * x * sin(x*beta/width) + height/2;
+    float p = random(1000);
+    if (p < 1) star(x,y);
+  }
+  //increase amplitude
+  a *= m/100;
+
+  if (a > height) noLoop();
+}
