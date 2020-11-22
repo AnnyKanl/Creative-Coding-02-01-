@@ -1,0 +1,54 @@
+float [][] colors = {{42, 157, 143},{233, 196, 106},{231, 111, 81},
+                     {163, 22, 33},{191, 219, 247},{5, 60, 94},
+                     {21, 21, 21},{166, 61, 64},{233, 184, 114}
+                    };
+
+int lines = 7;
+int i = 0;
+float mingap = 40;
+float maxgap = 200;
+
+void setup(){
+   size(800,800);
+   background(255);
+   strokeWeight(20);
+}
+
+void draw(){
+    //background(255);
+    float [] xlines = new float[lines];
+    float [] ylines = new float[lines];
+    float x = 0;
+    float y = 0;
+    int xc = 0;
+    int yc = 0;
+    int k = (int)random(0,3);
+    while (i < lines ){
+      x += random(2*mingap,maxgap);
+      y += random(2*mingap,maxgap);
+      if (x>width) {
+        x = random(xlines[xc]+mingap,xlines[xc+1]-mingap);
+        xc++;
+      }
+      if (y>height) {
+        y = random(ylines[yc]+mingap,ylines[yc+1]-mingap);
+        yc++;
+      }
+
+      xlines[i] = x;
+      ylines[i] = y;
+
+      int c = (int)random(0,3);
+      stroke(colors[3*k+c][0],colors[3*k+c][1],colors[3*k+c][2]);
+
+      line(0,y, 800,y);
+      line(x,0,x,800);
+      i++;
+    }
+    //noLoop();
+}
+
+void mousePressed() {
+   background(255);
+  i = 0;
+}
