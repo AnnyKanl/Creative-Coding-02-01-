@@ -24,13 +24,13 @@ void draw(){
     int yc = 0;
     int k = (int)random(0,3);
     while (i < lines ){
-      x += random(2*mingap,maxgap);
-      y += random(2*mingap,maxgap);
-      if (x>width) {
+      x += random(mingap,maxgap);
+      y += random(mingap,maxgap);
+      if (x>width || xc>0) {
         x = random(xlines[xc]+mingap,xlines[xc+1]-mingap);
         xc++;
       }
-      if (y>height) {
+      if (y>height || yc>0) {
         y = random(ylines[yc]+mingap,ylines[yc+1]-mingap);
         yc++;
       }
