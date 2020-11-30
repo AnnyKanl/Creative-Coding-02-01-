@@ -1,0 +1,71 @@
+int c = 0;
+char [] letters = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
+String text = "a ba cadae Afag aHaiajakalamanaoapaqarasatauavawaxayaz";
+char prev;
+float r, mx, my;
+
+void setup(){
+  size(800,800);
+  background(0);
+  textSize(32);
+  fill(255, 255, 255, 255);
+  mx = width/2;
+  my = height/2;
+  r = height/3;s
+  //circle of letters
+  translate(mx,my);
+  rotate(-PI/104);
+  for (int i = 0; i < 26; i++)
+  {
+    float angle = 2PI/26;
+    rotate(angle);
+    pushMatrix();
+    translate(1.1r,0);
+    rotate(PI/2);
+    text(letters[i],0,0);
+    popMatrix();
+  }
+  noFill();
+}
+
+void draw(){
+  translate(mx,my);
+  if (c == text.length()) noLoop();
+  else if (c == 0) prev = toLower(text.charAt(0));
+  else {
+    char curr = toLower(text.charAt(c));
+    if (curr != ' ' && curr != prev && isLetter(curr)) {
+      //position of letters
+      int i = curr - 'a'+1;
+      int j = prev - 'a'+1;
+      float x = r * cos (2PIi/26);
+      float y = r * sin (2PIi/26);
+      float px = r * cos (2PIj/26);
+      float py = r * sin (2PIj/26);
+      //random curvature
+      float rand1 = random(2,4);
+      float randx = random(-50,50);
+      float randy = random(-50,50);
+      //color according to how far apart the letters are
+      float t = abs(i-j) * 255 / 13;
+      float red = sin(0.024 * t + 0) * 127 + 150;
+      float green = sin(0.024 * t + 2) * 127 + 150;
+      float blue = sin(0.024 * t + 4) * 127 + 150;
+      stroke(red,green,blue,100);
+      curve(rand1x+randx,rand1y+randy,x,y,px,py,rand1px+randx,rand1py+randy);
+      prev = curr;
+    }
+  }
+  c++;
+  delay(10);
+}
+
+boolean isLetter(char c){
+  if (c >= 'a' && c <= 'z') return true;
+  else return false;
+}
+
+char toLower(char c) {
+  if (c >= 'A' && c <= 'Z') c+=32;
+  return c;
+}
