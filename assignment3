@@ -1,6 +1,6 @@
 int c = 0;
 char [] letters = {'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};
-String text = "a ba cadae Afag aHaiajakalamanaoapaqarasatauavawaxayaz";
+String text = "a ba cadae Afag aHaiajakalamanaoapaqarasatauavawaxayaz"; //put any sentence or paragraph here 
 char prev;
 float r, mx, my;
 
@@ -11,16 +11,16 @@ void setup(){
   fill(255, 255, 255, 255);
   mx = width/2;
   my = height/2;
-  r = height/3;s
+  r = height/3;
   //circle of letters
   translate(mx,my);
   rotate(-PI/104);
   for (int i = 0; i < 26; i++)
   {
-    float angle = 2PI/26;
+    float angle = 2*PI/26;
     rotate(angle);
     pushMatrix();
-    translate(1.1r,0);
+    translate(1.1*r,0);
     rotate(PI/2);
     text(letters[i],0,0);
     popMatrix();
@@ -38,10 +38,10 @@ void draw(){
       //position of letters
       int i = curr - 'a'+1;
       int j = prev - 'a'+1;
-      float x = r * cos (2PIi/26);
-      float y = r * sin (2PIi/26);
-      float px = r * cos (2PIj/26);
-      float py = r * sin (2PIj/26);
+      float x = r * cos (2*PI*i/26);
+      float y = r * sin (2*PI*i/26);
+      float px = r * cos (2*PI*j/26);
+      float py = r * sin (2*PI*j/26);
       //random curvature
       float rand1 = random(2,4);
       float randx = random(-50,50);
@@ -52,7 +52,7 @@ void draw(){
       float green = sin(0.024 * t + 2) * 127 + 150;
       float blue = sin(0.024 * t + 4) * 127 + 150;
       stroke(red,green,blue,100);
-      curve(rand1x+randx,rand1y+randy,x,y,px,py,rand1px+randx,rand1py+randy);
+      curve(rand1*x+randx,rand1*y+randy,x,y,px,py,rand1*px+randx,rand1*py+randy);
       prev = curr;
     }
   }
