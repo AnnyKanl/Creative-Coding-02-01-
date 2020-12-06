@@ -1,0 +1,137 @@
+import controlP5.*;  //for slider and buttons
+ControlP5 cp5;
+MyColorPicker cp;
+color c=color(0);
+int strWeight=30;
+int mode = 0; //tool selector 0-brush 1-splatter
+int mirror = 0;  //mirror mode 0-none  1-rotate 2-mirror
+float seed = random(1000);
+Brush brush = new Brush();
+
+void setup()
+{
+  cp5 = new ControlP5(this);
+  cp = new MyColorPicker(cp5, "hacktastic");
+  cp.setPosition(20,110).setColorValue(c);
+  cp.setItemSize(200, 20);
+  cp5.addSlider("Size").setPosition(20,230).setRange(1,100).setSize(180,20).setValue(30);
+  cp5.addButton("Brush").setValue(0).setPosition(20,270).setSize(200,60);
+  cp5.addButton("Splatter").setValue(0).setPosition(20,350).setSize(200,60);
+  cp5.addButton("Vanilla").setValue(0).setPosition(20,460).setSize(200,60);
+  cp5.addButton("Mirror1").setValue(0).setPosition(20,540).setSize(200,60);
+  cp5.addButton("Mirror2").setValue(0).setPosition(20,620).setSize(200,60);
+  cp5.addButton("Clear").setValue(0).setPosition(20,height-80).setSize(200,60);
+  
+  mode = 0;
+  mirror = 0;
+  size(1600, 900);
+  background(255, 245, 204);
+}
+void draw()
+{
+  //panel area
+  stroke(0);
+  strokeWeight(1);
+  fill(51);
+  rect(0,0,240,height);  //panel area
+  fill(80);
+  rect(15, 30, 208, 180);  //slider area
+  c = cp.getColorValue();
+  fill(c);
+  square(20,35,65);  //color
+  fill(255);
+  if (mode == 0) text("Brush mode",20,430);
+  else text("Splatter mode",20,430);
+  if (mirror == 0) text("Mirror Off",20,710);
+  else if (mirror == 1) text("Mirror 1",20,710);
+  else text("Mirror 2",20,710);
+ 
+  //brush effect
+  brush.x += (mouseX - brush.x)/12;
+  brush.y += (mouseY - brush.y)/12;
+  if (mousePressed && mode == 0)
+  {
+    float s = 1+2.5*strWeight/dist(brush.px, brush.py, brush.x, brush.y);
+    s=min(strWeight,s);
+    strokeWeight(s);
+    stroke(c);
+    line(brush.px, brush.py, brush.x, brush.y);
+    if (mirror == 1)
+    {
+      stroke(invertColor(c));
+      line(width-brush.px+240, height-brush.py, width-brush.x+240, height-brush.y);
+    }
+    if (mirror == 2)
+    {
+      stroke(invertColor(c));
+      line(width-brush.px+240, brush.py, width-brush.x+240, brush.y);
+    }
+  }
+  brush.px = brush.x;
+  brush.py = brush.y;
+  
+  //splatter effect
+  if (mousePressed && mode == 1 && mouseX > 240)
+  {
+    splatter(mouseX, mouseY, c);
+    if (mirror == 1) splatter(width-mouseX+240, height-mouseY, invertColor(c));
+    if (mirror == 2) splatter(width-mouseX+240, mouseY, invertColor(c));
+  }
+}
+
+void splatter(float bx, float by, color c1)
+{
+  bx += random(-15,15);
+  by += random(-15,15);
+  float mx = 10*(abs(mouseX-pmouseX));
+  float my = 10*(abs(mouseY-pmouseY));
+  for(int i = 0; i < 80; i++){
+    seed += 0.01;
+    float x = bx+mx*(0.5-noise(seed+i));
+    float y = by+my*(0.5-noise(seed+2*i));
+    float s = 150/dist(bx, by, x, y);
+    if( s > strWeight ) s=strWeight;
+    noStroke();
+    fill(c1);
+    circle(x,y,s);
+    seed += 0.01;
+  }
+}
+
+class MyColorPicker extends ColorPicker {
+  MyColorPicker(ControlP5 cp5, String theName) {
+    super(cp5, cp5.getTab("default"), theName, 0, 0, 100, 10);
+  }
+  void setItemSize(int w, int h) {
+    sliderRed.setSize(w, h);
+    sliderGreen.setSize(w, h);
+    sliderBlue.setSize(w, h);
+    sliderAlpha.setSize(w, h);
+
+    sliderGreen.setPosition(sliderGreen.getPosition()[0], sliderGreen.getPosition()[1]+h-10);
+    sliderBlue.setPosition(sliderBlue.getPosition()[0], sliderBlue.getPosition()[1]+2*(h-10));
+    sliderAlpha.setPosition(sliderAlpha.getPosition()[0], sliderAlpha.getPosition()[1]+3*(h-10));
+  }
+}
+
+class Brush
+{
+  float x = 0, y = 0, px = 0, py = 0;
+}
+
+color invertColor(color c)
+{
+  float r = red(c);
+  float g = green(c);
+  float b = blue(c);
+  return color(255-r,255-g,255-b);
+}
+
+//cp5 event calls
+void Size(float theValue) { strWeight = int(theValue); }
+void Brush() { mode = 0; }
+void Splatter() { mode = 1; }
+void Vanilla() { mirror = 0; }
+void Mirror1() { mirror = 1; }
+void Mirror2() { mirror = 2; }
+void Clear() { background(c); }
