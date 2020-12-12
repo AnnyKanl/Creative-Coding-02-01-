@@ -1,0 +1,202 @@
+import controlP5.*;
+ControlP5 cp5;
+int tool = 0;
+
+float elascity = 1;
+boolean trailOn = false;
+float gs = 1000;
+float gr = 1;
+float re = 1;
+float friction = 0;
+
+ArrayList <Particle> particles;
+float pSize = 10, pMass = 10;
+boolean fixed = false;
+boolean clear = false;
+
+void setup()
+{
+  cp5 = new ControlP5(this);
+  cp5.addSlider("PSize").setPosition(40,60).setRange(1,100).setSize(200,20).setValue(10);
+  cp5.addSlider("PMass").setPosition(40,100).setRange(0,100).setSize(200,20).setValue(10);
+  cp5.addToggle("Fixed").setValue(false).setPosition(40,140).setSize(220,60);
+  cp5.addButton("Add").setValue(0).setPosition(40,240).setSize(220,60);  
+  cp5.addSlider("ARStrength").setPosition(40,320).setRange(100,1000).setSize(200,20).setValue(1000);
+  cp5.addButton("Attract").setValue(0).setPosition(40,360).setSize(220,60);
+  cp5.addButton("Repel").setValue(0).setPosition(40,440).setSize(220,60);
+  cp5.addSlider("Elascity").setPosition(40,540).setRange(0,1).setSize(200,20).setValue(1);
+  cp5.addSlider("Gravity").setPosition(40,600).setRange(0,50).setSize(200,20).setValue(1);
+  cp5.addSlider("PRepelStrength").setPosition(40,640).setRange(0,1).setSize(200,20).setValue(1);
+  cp5.addSlider("Friction").setPosition(40,680).setRange(0,1).setSize(200,20).setValue(0);
+  cp5.addToggle("Trail").setValue(false).setPosition(40,720).setSize(220,60);
+  cp5.addButton("Clear").setValue(0).setPosition(40,height-80).setSize(220,60);
+  clear = false;
+  
+  size(1200,900);
+  background(0);
+  particles = new ArrayList <Particle>();
+  for (int i = 0; i < 30; i++)
+  {
+    Particle p = new Particle(random(300,width),random(0,height));
+    p.setMass(500).setRad(10).setColor(color(random(10,255),random(10,255),random(10,255))).setVel(random(0,2),0);
+    particles.add(p);
+  }
+  //particles.add(new Particle(750,450).setMass(9000).setRad(20).setFixed(true));
+}
+
+void draw()
+{
+  fill(255);
+  noStroke();
+  rect(0,0,width,height);
+  
+  if (clear) { particles.clear(); clear = false; }
+  
+  //display
+  for (int i = 0; i < particles.size(); i++)
+  {
+    particles.get(i).next();
+  }
+//update force
+  for (int i = 0; i < particles.size(); i++)
+  {
+    PVector a = new PVector(0,0);  //initialize accleration
+    Particle pi = particles.get(i);
+    for (int j = 0; j < particles.size(); j++)
+    {
+       if (i == j) continue;
+       Particle pj = particles.get(j);
+       PVector r = pj.loc.copy().sub(pi.loc);
+       float d = r.mag();
+       if (d < pi.rad + pj.rad)    //particles are touching/colliding
+       {
+         d = pi.rad + pj.rad;                    //ensure the gforce is not too large
+         particles.get(i).vel.mult(elascity);    //reduce velocity to create 'sticking' effect
+         //repel force between particles to create 'bouncing' effect
+         float mult2 = -1*re/ ((particles.get(i).mass+1)*d);    
+         PVector aj2 = r.normalize().mult(mult2);
+         a.add(aj2);
+       }
+       
+       float mult = gr*particles.get(j).mass / (d*d);  //magnitude of gforce
+       PVector aj = r.normalize().mult(mult);          //force vector
+       a.add(aj);
+    }
+    particles.get(i).acc = a;
+  } 
+  
+  if (mousePressed && mouseX > 300)
+  {
+    if (tool != 0)
+    {
+      float g = gs*gs;
+      if (tool == 1) g *= -1;
+      
+      PVector loc = new PVector(mouseX,mouseY);
+      
+      for (int i = 0; i < particles.size(); i++)
+      {
+        PVector r = particles.get(i).loc.copy().sub(loc);
+        float d = r.mag();
+        if (d < 5 ) continue; 
+        if (d < 20) d = 10;
+        float mult = g / (d*d*particles.get(i).mass);
+        particles.get(i).acc.add(r.normalize().mult(mult));
+      }
+    }
+  }
+  
+  fill(51);
+  noStroke();
+  rect(0,0,300,height);
+  fill(255);
+  textSize(16);
+  if (tool == 0) text("Current action: Add Particle",40,40);
+  if (tool == 1) text("Current action: Attract",40,40);
+  if (tool == 2) text("Current action: Repel",40,40);
+}
+
+void mouseClicked()
+{
+  if (tool == 0 && mouseX > 300)
+  {
+    particles.add(new Particle(mouseX,mouseY).setMass(pMass).setRad(pSize)
+    .setColor(color(random(10,255),random(10,255),random(10,255))).setFixed(fixed));   
+  }
+}
+
+class Particle
+{
+  float mass = 1;
+  float rad = 10;
+  color col= color(255);
+  PVector loc;
+  PVector vel = new PVector(0,0);;
+  PVector acc = new PVector(0,0);  
+  boolean fixed = false;
+  PVector[] trail = new PVector[30];
+  Particle(float x, float y) 
+  {
+    loc = new PVector(x,y); 
+    for (int i=0; i<30; i++) trail[i] = new PVector(x,y); 
+  }
+  Particle copy() {return this;}
+  Particle setMass(float m) { mass = m; return this;}
+  Particle setRad(float r) { rad = r; return this;}
+  Particle setVel(float x, float y) { vel = new PVector(x,y); return this;}
+  Particle setAcc(float x, float y) { acc = new PVector(x,y); return this;}
+  Particle setFixed(boolean f) { fixed = f; return this;}
+  Particle setColor(color c) { col = c; return this;}
+  void next()
+  {
+    display();
+    if (!fixed)
+    {
+      if(loc.x<=300 && vel.x<0) vel.x*=-1;
+      if(loc.x>=width && vel.x>0) vel.x*=-1;
+      if(loc.y<=0 && vel.y<0) vel.y*=-1;
+      if(loc.y>=height && vel.y>0) vel.y*=-1;
+      
+      if (trailOn) {
+        trail[0] = loc;
+        for(int i = 29; i > 0; i--) trail[i] = trail[i-1].copy();
+      }
+      
+      vel.add(acc);
+      
+      vel.mult(1-friction);
+      
+      loc.add(vel);
+      
+      
+    }
+  }
+  void display()
+  {
+    fill(col);
+    noStroke();
+    circle(loc.x,loc.y,2*rad);
+    if (trailOn) {
+      for(int i = 0; i < 29;i++)
+      {
+        stroke(col,200/(i+1)-2);
+        strokeWeight(2*rad);
+        line(trail[i].x,trail[i].y,trail[i+1].x,trail[i+1].y);
+      }
+    }
+  }
+}
+
+void PSize(float v) { pSize = v; }
+void PMass(float v) { pMass = v; }
+void Fixed(boolean v) { fixed = v; }
+void Add() { tool = 0; }
+void ARStrength(float v) { gs = v; }
+void Attract() { tool = 1; }
+void Repel() { tool = 2; }
+void Elascity(float v) { elascity = 0.2*v+0.8; }
+void Gravity(float v) { gr = v; }
+void PRepelStrength(float v) { re = v; }
+void Friction(float v) { friction = 0.1*v; }
+void Trail(boolean v) { trailOn = v; }
+void Clear() { clear = true; }
